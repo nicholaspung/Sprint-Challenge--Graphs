@@ -21,6 +21,34 @@ player = Player("Name", world.startingRoom)
 
 
 # FILL THIS IN
+# Not optimized queue
+# .pop(0), .append()
+q = []
+visited_rooms = set()
+parent = {}
+player.currentRoom = world.startingRoom
+q.append(player.currentRoom)
+while len(q) > 0:
+    v = q.pop(0)
+    path = []
+
+    visited_rooms.add(v)
+    exits = v.getExits()
+    for direction in exits:
+        room = v.getRoomInDirection(direction)
+        if room not in visited_rooms:
+            if room in parent:
+                parent[room].append(v)
+            else:
+                parent[room] = [v]
+            q.append(v.getRoomInDirection(direction))
+
+
+print(visited_rooms)
+print(len(visited_rooms))
+print(parent)
+
+
 traversalPath = ['n', 's']
 
 
