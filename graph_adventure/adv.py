@@ -48,54 +48,82 @@ player = Player("Name", world.startingRoom)
 # print(parent)
 
 # Do a DFS first to go to a deadend
-s = []
-visited_rooms = set()
-intersection_rooms = set()
-parent = {}
-player.currentRoom = world.startingRoom
-s.append(player.currentRoom)
-path = []
-while len(s) > 0:
-    v = s.pop()
-    if v in visited_rooms:
-        continue
-    exits = v.getExits()
-    visited_rooms.add(v)
-    path.append(v.id)
-    if len(exits) > 2:
-        intersection_rooms.add(v.id)
+# s = []
+# visited_rooms = set()
+# intersection_rooms = set()
+# parent = {}
+# player.currentRoom = world.startingRoom
+# s.append(player.currentRoom)
+# path = []
+# while len(s) > 0:
+#     v = s.pop()
+#     if v in visited_rooms:
+#         continue
+#     exits = v.getExits()
+#     visited_rooms.add(v)
+#     path.append(v.id)
+#     if len(exits) > 2:
+#         intersection_rooms.add(v.id)
 
-    # for deadends
-    if len(exits) == 1:
-        if len(visited_rooms) == len(roomGraph):
-            break
-        currentRoom = v.id
-        while currentRoom not in intersection_rooms:
-            currentRoom = parent[currentRoom][0]
-            path.append(currentRoom)
+#     # for deadends
+#     if len(exits) == 1:
+#         if len(visited_rooms) == len(roomGraph):
+#             break
+#         currentRoom = v.id
+#         while currentRoom not in intersection_rooms:
+#             currentRoom = parent[currentRoom][0]
+#             path.append(currentRoom)
 
-        # Need to figure out how to move up 
+#         # Need to figure out how to move up 
 
-    else:
-        for direction in exits:
-            room = v.getRoomInDirection(direction)
-            if room.id in intersection_rooms:
-                # checks on 2 paths
-                if path[-2] != room.id:
-                    path.append(room.id)
-                    # path.append(parent[v.id][0])
+#     else:
+#         for direction in exits:
+#             room = v.getRoomInDirection(direction)
+#             if room.id in intersection_rooms:
+#                 # checks on 2 paths
+#                 if path[-2] != room.id:
+#                     path.append(room.id)
+#                     # path.append(parent[v.id][0])
                 
 
-            if room not in visited_rooms:
-                if room.id in parent:
-                    parent[room.id].append(v.id)
-                else:
-                    parent[room.id] = [v.id]
-                s.append(v.getRoomInDirection(direction))
+#             if room not in visited_rooms:
+#                 if room.id in parent:
+#                     parent[room.id].append(v.id)
+#                 else:
+#                     parent[room.id] = [v.id]
+#                 s.append(v.getRoomInDirection(direction))
 
-print(len(visited_rooms), len(roomGraph))
-print(path)
-print(parent)
+# print(len(visited_rooms), len(roomGraph))
+# print(path)
+# print(parent)
+
+# BFT
+def bft(first_node, intersection_storage, deadends):
+    q = []
+    bft_visited = set()
+    depth = 0
+    bft_path = []
+    q.append([first_node, depth])
+    while len(q) > 0:
+        v_array = q.pop(0)
+        v = v_array[0]
+        v_depth = v_array[1]
+        bft_visited.add(v)
+        bft_path.append(v_array)
+
+        exits = v.getExits()
+        if len(exits) > 2:
+            intersection_storage[v] = True
+        if len(exits) > 0:
+            next_depth = v_depth + 1
+        if len(exits) == 0:
+            deadends[v] = True
+
+        for direction in exits:
+            room = v.getRoomInDirection(direction)
+            q.append([room, next_depth])
+    
+    return bft_path
 
 
 traversalPath = ['n', 's']
