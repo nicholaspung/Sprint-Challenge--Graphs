@@ -147,51 +147,73 @@ def dfs(first_node, path):
     s.append(first_node)
     dfs_visited = {}
     color_dfs = {}
-    while len(s) > 0:
-    # for i in range(34):
+    # while len(s) > 0:
+    for i in range(29):
         v = s.pop()
         path.append(v)
         exits = v.getExits()
+
+        # Creates directions for rooms filled with "?"
         if v not in dfs_visited:
             dfs_visited[v] = {}
             for direction in exits:
                 dfs_visited[v][direction] = "?"
-            color_dfs[v] = "white"
+            # Mark room as "white"
+            color_dfs[v.id] = "white"
         
-        try_direction = exits.pop()
-        while color_dfs[v.getRoomInDirection(try_direction)] != "white":
-            next_direction = exits.pop()
-            exits.append(try_direction)
-            try_direction = next_direction
-            try_room = v.getRoomInDirection(try_direction)
+        # Find color of rooms known
+        rooms = []
+        for direction in exits:
+            rooms.append([v.getRoomInDirection(direction), direction])
+        color_rooms = {}
+        no_color_rooms = []
+        for room in rooms:
+            if room[0].id in color_dfs:
+                color_rooms[room[0].id] = [color_dfs[room[0].id], room[1]]
+            else:
+                no_color_rooms.append(room[1])
+
+        # See if there's a white direction
+        if len(exits) == len(color_rooms.keys()):
+            # If same, find a "grey"
+            for room, color in color_rooms.items():
+                if color[0] == "grey":
+                    try_direction = color[1]
+                    break
+                else:
+                    continue
+        else:
+            # Else, find first direction not in color_rooms
+            try_direction = no_color_rooms.pop()
 
 
-        is_done = False
+        try_room = v.getRoomInDirection(try_direction)
+        # Check length of exits and length of keys
+
+
+
+        # Grabs "?" direction, deleting directions that are found
         while dfs_visited[v][try_direction] != "?":
             if len(exits) > 0:
                 try_direction = exits.pop()
-            else:
-                color_dfs[v] = "black"
-                is_done = True
-                break
-        
-        if is_done:
-            break
 
+        # Found "?" direction
         try_room = v.getRoomInDirection(try_direction)
-        try:
-            # For 2 connections
-            if path[-2] == try_room:
-                next_direction = exits.pop()
-                exits.append(try_direction)
-                try_direction = next_direction
-                try_room = v.getRoomInDirection(try_direction)
-        except IndexError:
-            print("Not in path")
 
+        
+
+        # In dfs_visited, marks direction with room
         dfs_visited[v][try_direction] = try_room
-        s.append(dfs_visited[v][try_direction])
+        # Adds room to stack
+        s.append(try_room)
 
+        # Check is current room done
+        if "?" in dfs_visited[v].values():
+            color_dfs[v.id] = "grey"
+        else:
+            color_dfs[v.id] = "black"
+
+        
 
     return path
 
