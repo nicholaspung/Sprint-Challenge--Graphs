@@ -97,6 +97,10 @@ player = Player("Name", world.startingRoom)
 # print(path)
 # print(parent)
 
+player.currentRoom = world.startingRoom
+intersection_rooms = {}
+deadends = {}
+
 # BFT
 def bft(first_node, intersection_storage, deadends):
     q = []
@@ -113,18 +117,90 @@ def bft(first_node, intersection_storage, deadends):
 
         exits = v.getExits()
         if len(exits) > 2:
+            # intersection_storage[v.id] = True
             intersection_storage[v] = True
-        if len(exits) > 0:
+        if len(exits) > 1:
             next_depth = v_depth + 1
-        if len(exits) == 0:
+        if len(exits) == 1:
+            # deadends[v.id] = True
             deadends[v] = True
 
         for direction in exits:
             room = v.getRoomInDirection(direction)
-            q.append([room, next_depth])
+            if room not in bft_visited:
+                q.append([room, next_depth])
     
     return bft_path
 
+first_bft = bft(player.currentRoom, intersection_rooms, deadends)
+# display_this = []
+# for i in range(len(first_bft)):
+#     display_this.append([first_bft[i][0].id, first_bft[i][1]])
+# print(display_this)
+# print(first_bft)
+# print(intersection_rooms)
+# print(deadends)
+
+path = []
+def dfs(first_node, path):
+    s = []
+    s.append(first_node)
+    dfs_visited = {}
+    color_dfs = {}
+    while len(s) > 0:
+    # for i in range(34):
+        v = s.pop()
+        path.append(v)
+        exits = v.getExits()
+        if v not in dfs_visited:
+            dfs_visited[v] = {}
+            for direction in exits:
+                dfs_visited[v][direction] = "?"
+            color_dfs[v] = "white"
+        
+        try_direction = exits.pop()
+        while color_dfs[v.getRoomInDirection(try_direction)] != "white":
+            next_direction = exits.pop()
+            exits.append(try_direction)
+            try_direction = next_direction
+            try_room = v.getRoomInDirection(try_direction)
+
+
+        is_done = False
+        while dfs_visited[v][try_direction] != "?":
+            if len(exits) > 0:
+                try_direction = exits.pop()
+            else:
+                color_dfs[v] = "black"
+                is_done = True
+                break
+        
+        if is_done:
+            break
+
+        try_room = v.getRoomInDirection(try_direction)
+        try:
+            # For 2 connections
+            if path[-2] == try_room:
+                next_direction = exits.pop()
+                exits.append(try_direction)
+                try_direction = next_direction
+                try_room = v.getRoomInDirection(try_direction)
+        except IndexError:
+            print("Not in path")
+
+        dfs_visited[v][try_direction] = try_room
+        s.append(dfs_visited[v][try_direction])
+
+
+    return path
+
+first_dfs = dfs(player.currentRoom, path)
+display_this = []
+for i in range(len(first_dfs)):
+    display_this.append(first_dfs[i].id)
+print(display_this)
+# print(first_dfs)
 
 traversalPath = ['n', 's']
 
